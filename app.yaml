@@ -1,0 +1,31 @@
+# Static-only App Engine service. Requests are served from dist/index.html
+# by App Engine's static file infrastructure, not by a language runtime.
+runtime: nodejs22
+service: unicorn-resurrection
+
+# Keep idle cost at zero; static handlers do not use instances.
+automatic_scaling:
+  min_instances: 0
+  max_instances: 1
+
+handlers:
+  # Site root
+  - url: /
+    static_files: dist/index.html
+    upload: dist/index.html
+    expiration: 1m
+    secure: always
+    http_headers:
+      Cache-Control: "no-cache"
+
+  # Any other path also serves the single-file game
+  - url: /(.*)
+    static_files: dist/index.html
+    upload: dist/index.html
+    expiration: 1m
+    secure: always
+    http_headers:
+      Cache-Control: "no-cache"
+
+# Example command:
+# gcloud app deploy --project=shafayets-toolchain
