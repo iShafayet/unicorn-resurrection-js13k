@@ -326,6 +326,7 @@ export const tick = () => {
       game.grief = 1;
       griefLock = 40;
       griefAlpha = 0;
+      parkMom();
       sayGrief(0);
       return;
     }

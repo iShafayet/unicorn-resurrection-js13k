@@ -5,7 +5,7 @@ import {
 import { World } from '../level';
 import { View } from '../game';
 import { ctx, drawSprite } from './canvas';
-import { momLie, momLieShut, momCeiling, momStand, momStandShut, momLook } from './mom-sprites';
+import { momLieShut, momCeiling, momStand, momStandShut, momLook } from './mom-sprites';
 
 export const drawTiles = (world: World, cameraX: number) => {
   const x0 = Math.max(0, (cameraX / TILE) | 0);
@@ -112,7 +112,7 @@ export const drawHospital = (view: View) => {
   } else if (momPose === Mom.Ceiling) {
     drawSprite(momCeiling, x, y);
   } else if (momPose === Mom.Lying || momPose === Mom.Camera) {
-    drawSprite(slain ? momLieShut : momLie, x, y);
+    drawSprite(momLieShut, x, y);
     if (slain && momPose === Mom.Lying) {
       ctx.fillStyle = '#a81820';
       ctx.fillRect(x + 8, y + 6, 8, 2);

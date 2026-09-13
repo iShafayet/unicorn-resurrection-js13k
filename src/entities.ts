@@ -8,7 +8,7 @@ import {
   SPIT_FAR, SPIT_COOLDOWN, JAW_FRAMES, VOMIT_GRAVITY, VOMIT_ARC, SLIME_WIDTH, SLIME_LIFE,
   KNOCKBACK_X, KNOCKBACK_Y, Phase, Kind, Stance, ACTIVATE_RADIUS, TILE, TILE_ROWS, VIEW_WIDTH,
   PLAYER_WIDTH, PLAYER_HEIGHT, UNICORN_WIDTH, UNICORN_HEIGHT, STARTING_LIVES, SPAWN_GAP,
-  MIN_LIVE_UNICORNS, CEILING_ROW,
+  SPAWN_PLAYER_CLEAR, MIN_LIVE_UNICORNS, CEILING_ROW,
 } from './config';
 import { shake } from './graphics/canvas';
 import { input } from './input';
@@ -586,6 +586,13 @@ const groundY = (world: World, x: number) => {
   return -1;
 };
 
+const onPlayer = (game: Game, x: number, y: number, w = UNICORN_WIDTH, h = UNICORN_HEIGHT) => {
+  const p = game.player;
+  const dx = x + w / 2 - (p.x + p.w / 2);
+  const dy = y - h / 2 - (p.y + p.h / 2);
+  return dx * dx + dy * dy < SPAWN_PLAYER_CLEAR * SPAWN_PLAYER_CLEAR;
+};
+
 export const ensureUnicorns = (game: Game) => {
   if (game.phase !== Phase.Hunt && game.phase !== Phase.Return) return;
   let live = 0;
@@ -606,7 +613,7 @@ export const ensureUnicorns = (game: Game) => {
     }
     if (near) continue;
     const floor = groundY(game.world, wx);
-    if (floor < 0) continue;
+    if (floor < 0 || onPlayer(game, wx, floor)) continue;
     game.unicorns.push(createUnicorn({ x: wx, y: floor, kind: pickKind(game.world.rng, game.loop), used: 1 }, game));
     live++;
   }
@@ -624,6 +631,8 @@ export const activateSpawns = (game: Game, list: Spawn[]) => {
       }
     }
     if (near) continue;
+    const scale = UNICORN_SCALE[spawn.kind];
+    if (onPlayer(game, spawn.x, spawn.y, UNICORN_WIDTH * scale, UNICORN_HEIGHT * scale)) continue;
     spawn.used = 1;
     game.unicorns.push(createUnicorn(spawn, game));
   }
