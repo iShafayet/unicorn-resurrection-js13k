@@ -1,27 +1,25 @@
-import { drawEngine } from './core/draw-engine';
-import { menuState } from './game-states/menu.state';
-import { createGameStateMachine, gameStateMachine } from './game-state-machine';
-import { controls } from '@/core/controls';
+import { bindInput } from './input';
+import { boot, tick } from './game';
+import { draw } from './graphics/scene';
+import { resize } from './graphics/canvas';
 
-createGameStateMachine(menuState);
+bindInput();
+boot();
+addEventListener('resize', resize);
+resize();
 
-let previousTime = 0;
-const interval = 1000 / 60;
+let previous = 0;
+const FRAME_MS = 1000 / 60;
+let accumulator = 0;
 
-(function draw(currentTime: number) {
-  const delta = currentTime - previousTime;
-
-  if (delta >= interval) {
-    previousTime = currentTime - (delta % interval);
-
-    controls.queryController();
-    drawEngine.context.clearRect(0, 0, drawEngine.canvasWidth, drawEngine.canvasHeight);
-    // Although the game is currently set at 60fps, the state machine accepts a time passed to onUpdate
-    // If you'd like to unlock the framerate, you can instead use an interval passed to onUpdate to 
-    // adjust your physics so they are consistent across all frame rates.
-    // If you do not limit your fps or account for the interval your game will be far too fast or far too 
-    // slow for anyone with a different refresh rate than you.
-    gameStateMachine.getState().onUpdate(delta);
+const frame = (now: number) => {
+  accumulator += Math.min(now - previous, 64);
+  previous = now;
+  while (accumulator >= FRAME_MS) {
+    tick();
+    accumulator -= FRAME_MS;
   }
-  requestAnimationFrame(draw);
-})(0);
+  draw();
+  requestAnimationFrame(frame);
+};
+requestAnimationFrame(frame);

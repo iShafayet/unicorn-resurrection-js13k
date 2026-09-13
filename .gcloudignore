@@ -1,0 +1,8 @@
+# gcloud uploads the project root unless ignored here.
+# app.yaml `upload:` only filters what handlers may serve after upload.
+#
+# Ignore everything, then keep the static game files only.
+*
+!app.yaml
+!dist/
+!dist/index.html
